@@ -1,0 +1,27 @@
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum PaymentPurpose {
+  MEMBERSHIP_DUE
+  EVENT_FEE
+}
+
+model Payment {
+  id            String         @id @default(uuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  dueId         String?        @unique
+  due           MonthlyDue?    @relation(fields: [dueId], references: [id])
+  amount        Decimal        @db.Decimal(10, 2)
+  purpose       PaymentPurpose
+  status        PaymentStatus  @default(PENDING)
+  transactionId String?        @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("payments")
+}

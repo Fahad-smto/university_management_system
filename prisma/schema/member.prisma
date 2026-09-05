@@ -1,0 +1,26 @@
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  EXPIRED
+}
+
+model MemberProfile {
+  id               String           @id @default(uuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id])
+  sectionId        String?
+  section          Section?         @relation(fields: [sectionId], references: [id])
+  studentIdNo      String           @unique
+  session          String
+  class            String
+  membershipStatus MembershipStatus @default(PENDING)
+  joinedAt         DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+
+  monthlyDues MonthlyDue[]
+
+  @@map("member_profiles")
+}

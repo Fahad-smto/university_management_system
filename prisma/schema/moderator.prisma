@@ -1,0 +1,38 @@
+enum ModeratorStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Moderator {
+  id          String          @id @default(uuid())
+  name        String
+  type        String
+  tenureStart DateTime
+  tenureEnd   DateTime?
+  status      ModeratorStatus @default(ACTIVE)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+
+  members ModeratorMember[]
+  events  Event[]
+  notices Notice[]
+
+  @@map("moderators")
+}
+
+model ModeratorMember {
+  id          String    @id @default(uuid())
+  moderatorId String
+  moderator   Moderator @relation(fields: [moderatorId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  position    String
+  joinedAt    DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([moderatorId, position])
+  @@map("moderator_members")
+}

@@ -1,0 +1,37 @@
+enum ElectionStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+}
+
+model ElectionInfo {
+  id              String         @id @default(uuid())
+  title           String
+  description     String?
+  electionDate    DateTime
+  resultAnnounced Boolean        @default(false)
+  resultSummary   String?
+  status          ElectionStatus @default(UPCOMING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  candidates ElectionCandidate[]
+
+  @@map("election_infos")
+}
+
+model ElectionCandidate {
+  id         String       @id @default(uuid())
+  electionId String
+  election   ElectionInfo @relation(fields: [electionId], references: [id])
+  name       String
+  position   String
+  photoUrl   String?
+  manifesto  String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+
+  @@map("election_candidates")
+}

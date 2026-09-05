@@ -1,0 +1,43 @@
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  CANCELLED
+}
+
+model Event {
+  id          String      @id @default(uuid())
+  moderatorId String
+  moderator   Moderator   @relation(fields: [moderatorId], references: [id])
+  title       String
+  description String?
+  venue       String
+  eventDate   DateTime
+  fee         Decimal     @default(0) @db.Decimal(10, 2)
+  status      EventStatus @default(UPCOMING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+
+  registrations EventRegistration[]
+
+  @@map("events")
+}
+
+model EventRegistration {
+  id           String             @id @default(uuid())
+  eventId      String
+  event        Event              @relation(fields: [eventId], references: [id])
+  userId       String
+  user         User               @relation(fields: [userId], references: [id])
+  status       RegistrationStatus @default(REGISTERED)
+  registeredAt DateTime           @default(now())
+
+  @@unique([eventId, userId])
+  @@map("event_registrations")
+}
