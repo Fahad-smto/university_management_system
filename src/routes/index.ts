@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 // TODO: import each module's routes as they get implemented
 // import { AuthRoutes } from '../modules/Auth/auth.route';
@@ -18,19 +18,19 @@ import { Router } from 'express';
 const router = Router();
 
 const moduleRoutes: { path: string; route: Router }[] = [
-  // { path: '/auth', route: AuthRoutes },
-  // { path: '/users', route: UserRoutes },
-  // { path: '/sections', route: SectionRoutes },
-  // { path: '/members', route: MemberRoutes },
-  // { path: '/moderators', route: ModeratorRoutes },
-  // { path: '/elections', route: ElectionRoutes },
-  // { path: '/monthly-dues', route: MonthlyDueRoutes },
-  // { path: '/payments', route: PaymentRoutes },
-  // { path: '/events', route: EventRoutes },
-  // { path: '/notices', route: NoticeRoutes },
-  // { path: '/complaints', route: ComplaintRoutes },
-  // { path: '/admin', route: AdminRoutes },
-  // { path: '/', route: DashboardRoutes },
+	// { path: '/auth', route: AuthRoutes },
+	// { path: '/users', route: UserRoutes },
+	// { path: '/sections', route: SectionRoutes },
+	// { path: '/members', route: MemberRoutes },
+	// { path: '/moderators', route: ModeratorRoutes },
+	// { path: '/elections', route: ElectionRoutes },
+	// { path: '/monthly-dues', route: MonthlyDueRoutes },
+	// { path: '/payments', route: PaymentRoutes },
+	// { path: '/events', route: EventRoutes },
+	// { path: '/notices', route: NoticeRoutes },
+	// { path: '/complaints', route: ComplaintRoutes },
+	// { path: '/admin', route: AdminRoutes },
+	// { path: '/', route: DashboardRoutes },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

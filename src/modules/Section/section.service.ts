@@ -4,9 +4,9 @@
 
 // TODO: implement Section business logic / Prisma queries here
 export const SectionService = {
-  // create: async (payload: any) => {},
-  // getAll: async (filters: ISectionFilters, options: IPaginationOptions) => {},
-  // getSingle: async (id: string) => {},
-  // update: async (id: string, payload: any) => {},
-  // softDelete: async (id: string) => {},
+	// create: async (payload: any) => {},
+	// getAll: async (filters: ISectionFilters, options: IPaginationOptions) => {},
+	// getSingle: async (id: string) => {},
+	// update: async (id: string, payload: any) => {},
+	// softDelete: async (id: string) => {},
 };

@@ -1,16 +1,16 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
 export const notFound = (req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    message: 'Not Found',
-    errors: [
-      {
-        path: req.originalUrl,
-        message: 'API Not Found',
-      },
-    ],
-  });
+	res.status(404).json({
+		success: false,
+		message: "Not Found",
+		errors: [
+			{
+				path: req.originalUrl,
+				message: "API Not Found",
+			},
+		],
+	});
 };
 
 export default notFound;

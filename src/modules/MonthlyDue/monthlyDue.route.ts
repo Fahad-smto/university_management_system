@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from "express";
 // import auth from '../../middlewares/auth';
 // import validateRequest from '../../middlewares/validateRequest';
 // import { MonthlyDueController } from './monthlyDue.controller';

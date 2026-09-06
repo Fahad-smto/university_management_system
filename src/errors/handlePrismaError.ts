@@ -1,7 +1,7 @@
 type IGenericErrorResponse = {
-  statusCode: number;
-  message: string;
-  errorMessages: { path: string | number; message: string }[];
+	statusCode: number;
+	message: string;
+	errorMessages: { path: string | number; message: string }[];
 };
 
 // TODO: branch on Prisma error codes
@@ -9,11 +9,11 @@ type IGenericErrorResponse = {
 // P2025 -> record not found
 // P2003 -> foreign key constraint failed
 export const handlePrismaError = (error: any): IGenericErrorResponse => {
-  return {
-    statusCode: 400,
-    message: 'Database Error',
-    errorMessages: [],
-  };
+	return {
+		statusCode: 400,
+		message: "Database Error",
+		errorMessages: [],
+	};
 };
 
 export default handlePrismaError;

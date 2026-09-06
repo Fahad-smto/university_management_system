@@ -12,37 +12,42 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "format:check" :"npx @biomejs/biome format ./src",
+    "format:fix" :"npx @biomejs/biome format --write ./src",
+    "link:check" :"npx @biomejs/biome lint ./src ./public",
+    "link:fix" :"npx @biomejs/biome lint --write ./src"
   },
   "prisma": {
     "schema": "prisma/schema"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@prisma/client": "^5.18.0",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "cookie-parser": "^1.4.6",
-    "bcrypt": "^5.1.1",
-    "jsonwebtoken": "^9.0.2",
-    "zod": "^3.23.8",
-    "@prisma/client": "^5.18.0",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.4.0"
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5.5.4",
-    "tsx": "^4.19.2",
-    "prisma": "^5.18.0",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.14.15",
-    "@types/cors": "^2.8.17",
-    "@types/cookie-parser": "^1.4.7",
+    "@biomejs/biome": "2.5.12",
     "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.15",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "prisma": "^5.18.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4"
   }
 }
