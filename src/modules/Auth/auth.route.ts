@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { AuthController } from "./auth.controller";
 // import auth from '../../middlewares/auth';
 // import validateRequest from '../../middlewares/validateRequest';
 // import { AuthController } from './auth.controller';
@@ -8,6 +9,9 @@ const router = Router();
 
 // TODO: define Auth routes here
 // router.post('/', validateRequest(AuthValidation.createZod), auth('ADMIN', 'MODERATOR'), AuthController.create);
+
+router.post("/google-login", AuthController.googleLogin);
+
 // router.get('/', AuthController.getAll);
 // router.get('/:id', AuthController.getSingle);
 // router.patch('/:id', validateRequest(AuthValidation.updateZod), auth('ADMIN', 'MODERATOR'), AuthController.update);

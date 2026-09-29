@@ -3,3 +3,8 @@
 export type IAuthFilters = {
 	searchTerm?: string;
 };
+
+
+export interface IgoogleLoginpayload {
+	idToken: string;
+}	
