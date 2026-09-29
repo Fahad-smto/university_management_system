@@ -6,7 +6,7 @@ export const pick = <T extends Record<string, unknown>, K extends keyof T>(
 ): Partial<T> => {
 	const finalObj: Partial<T> = {};
 	for (const key of keys) {
-		if (obj && Object.hasOwn(obj, key)) {
+		if (obj && Object.prototype.hasOwnProperty.call(obj, key)) {
 			finalObj[key] = obj[key];
 		}
 	}

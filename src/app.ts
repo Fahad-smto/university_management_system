@@ -19,7 +19,7 @@ app.use(rateLimiter);
 app.get("/", (req: Request, res: Response) => {
 	res.status(200).json({
 		success: true,
-		message: "College Organization Management System API is running",
+		message: "university Organization Management System API is running",
 	});
 });
 
