@@ -1,20 +1,14 @@
-import { Router } from "express";
-import { AuthController } from "./auth.controller";
-// import auth from '../../middlewares/auth';
-// import validateRequest from '../../middlewares/validateRequest';
-// import { AuthController } from './auth.controller';
-// import { AuthValidation } from './auth.validation';
+import { Router } from 'express';
+import { AuthController } from './auth.controller';
+import validateRequest from '../../middlewares/validateRequest';
+import { AuthValidation } from './auth.validation';
 
 const router = Router();
 
-// TODO: define Auth routes here
-// router.post('/', validateRequest(AuthValidation.createZod), auth('ADMIN', 'MODERATOR'), AuthController.create);
-
-router.post("/google-login", AuthController.googleLogin);
-
-// router.get('/', AuthController.getAll);
-// router.get('/:id', AuthController.getSingle);
-// router.patch('/:id', validateRequest(AuthValidation.updateZod), auth('ADMIN', 'MODERATOR'), AuthController.update);
-// router.delete('/:id', auth('ADMIN'), AuthController.softDelete);
+router.post('/register', validateRequest(AuthValidation.registerZod), AuthController.register);
+router.post('/login', validateRequest(AuthValidation.loginZod), AuthController.login);
+router.post('/refresh-token', AuthController.refreshToken);
+router.post('/logout', AuthController.logout);
+router.post('/google-login', AuthController.googleLogin);
 
 export const AuthRoutes = router;
