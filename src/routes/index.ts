@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { AuthRoutes } from "../modules/Auth/auth.route";
 
 // TODO: import each module's routes as they get implemented
 // import { AuthRoutes } from '../modules/Auth/auth.route';
@@ -18,7 +19,7 @@ import { Router } from "express";
 const router = Router();
 
 const moduleRoutes: { path: string; route: Router }[] = [
-	// { path: '/auth', route: AuthRoutes },
+	{ path: '/auth', route: AuthRoutes },
 	// { path: '/users', route: UserRoutes },
 	// { path: '/sections', route: SectionRoutes },
 	// { path: '/members', route: MemberRoutes },
