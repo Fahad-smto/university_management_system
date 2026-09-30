@@ -9,7 +9,7 @@ const registerZod = z.object({
     password: z
       .string({ required_error: 'Password is required' })
       .min(6, 'Password must be at least 6 characters'),
-    phone: z.string().optional(),
+    phone: z.string({ required_error: 'Phone number is required' }).min(10, 'Phone number must be at least 10 digits'),
   }),
 });
 
