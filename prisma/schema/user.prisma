@@ -1,9 +1,9 @@
 enum Role {
+  SUPER_ADMIN
   ADMIN
   MODERATOR
   MEMBER
 }
-
 model User {
   id        String    @id @default(uuid())
   name      String
