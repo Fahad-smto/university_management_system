@@ -16,6 +16,14 @@ export const config = {
   },
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
 
+
+   redis: {
+    user: process.env.redis_user,
+    password: process.env.redis_password,
+    host: process.env.redis_host,
+    port: process.env.redis_port,
+  },
+
   // নতুন — seed এর জন্য
   seed: {
     super_admin: {
