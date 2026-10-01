@@ -166,9 +166,21 @@ const googleLogin = async (payload: IgoogleLoginpayload) => {
   return { accessToken, refreshToken: refreshTok };
 };
 
+
+const forgotPassword =async(payload: any)=>{
+
+}
+
+
+const resetPassword = async(newPassword: any, newPassword: any)=>{
+
+}
+
 export const AuthService = {
   register,
   login,
   refreshToken,
   googleLogin,
+  forgotPassword,
+  resetPassword,
 };

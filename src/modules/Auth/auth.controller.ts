@@ -87,10 +87,43 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+
+  const payload =req.body.email
+
+  await AuthService.forgotPassword(payload);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Password reset link sent to your email',
+  });
+});
+
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const {  token, newPassword } = req.body;
+
+  await AuthService.resetPassword(token, newPassword);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Password reset successful',
+  });
+});
+
+
+
+
+
 export const AuthController = {
   register,
   login,
   refreshToken,
   logout,
   googleLogin,
+  forgotPassword,
+  resetPassword
 };
