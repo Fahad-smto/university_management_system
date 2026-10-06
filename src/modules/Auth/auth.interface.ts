@@ -1,4 +1,3 @@
-// manual register এ যা যা লাগবে
 export type IRegisterPayload = {
   name: string;
   email: string;
@@ -6,20 +5,34 @@ export type IRegisterPayload = {
   phone?: string;
 };
 
-// manual login এ যা যা লাগবে
 export type ILoginPayload = {
   email: string;
   password: string;
 };
 
-// JWT এর ভিতরে যা যা থাকবে (কখনো password রাখবেন না এখানে)
 export type IJwtPayload = {
   id: string;
   email: string;
   role: string;
 };
 
-// Google login payload (আপনার আগের কোড থেকে রাখা হলো)
 export type IgoogleLoginpayload = {
   idToken: string;
+};
+
+export type IForgotPasswordPayload = {
+  email: string;
+};
+
+export type IResetPasswordPayload = {
+  email: string;
+  otp: string;
+  newPassword: string;
+};
+
+// changePassword এ OTP লাগছে না — তাই শুধু old/new password আর userId
+export type IChangePasswordPayload = {
+  userId: string;
+  oldPassword: string;
+  newPassword: string;
 };

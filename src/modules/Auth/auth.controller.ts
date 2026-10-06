@@ -6,19 +6,18 @@ import { AuthService } from './auth.service';
 
 const isProduction = config.env === 'production';
 
-// cookie options — httpOnly মানে JavaScript দিয়ে ব্রাউজার থেকে এই কুকি পড়া যাবে না (XSS থেকে সুরক্ষা)
 const accessTokenCookieOptions = {
   httpOnly: true,
-  secure: isProduction, // production এ শুধু HTTPS এ পাঠাবে
+  secure: isProduction,
   sameSite: 'strict' as const,
-  maxAge: 24 * 60 * 60 * 1000, // ১ দিন
+  maxAge: 24 * 60 * 60 * 1000,
 };
 
 const refreshTokenCookieOptions = {
   httpOnly: true,
   secure: isProduction,
   sameSite: 'strict' as const,
-  maxAge: 30 * 24 * 60 * 60 * 1000, // ৩০ দিন
+  maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
 const register = catchAsync(async (req: Request, res: Response) => {
@@ -35,7 +34,6 @@ const register = catchAsync(async (req: Request, res: Response) => {
 const login = catchAsync(async (req: Request, res: Response) => {
   const { accessToken, refreshToken } = await AuthService.login(req.body);
 
-  // দুটো টোকেনই httpOnly cookie হিসেবে পাঠানো হচ্ছে
   res.cookie('accessToken', accessToken, accessTokenCookieOptions);
   res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
 
@@ -43,7 +41,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: 'Logged in successfully',
-    data: { accessToken, refreshToken },
+    data: { accessToken,refreshToken },
   });
 });
 
@@ -87,36 +85,42 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  await AuthService.forgotPassword({ email: req.body.email });
 
-  const payload =req.body.email
-
-  await AuthService.forgotPassword(payload);
-
+  // নিরাপত্তার জন্য — ইউজার থাকুক বা না থাকুক, একই message
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Password reset link sent to your email',
+    message: 'If an account with this email exists, an OTP has been sent',
   });
 });
 
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
-  const {  token, newPassword } = req.body;
+  const { email, otp, newPassword } = req.body;
 
-  await AuthService.resetPassword(token, newPassword);
+  await AuthService.resetPassword({ email, otp, newPassword });
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Password reset successful',
+    message: 'Password reset successful. Please log in with your new password',
   });
 });
 
+// এই রুট লগইন করা ইউজারের জন্য — তাই req.user থেকে id আসবে (auth middleware থেকে)
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = (req as any).user.id;
 
+  await AuthService.changePassword({ userId, oldPassword, newPassword });
 
-
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Password changed successfully',
+  });
+});
 
 export const AuthController = {
   register,
@@ -125,5 +129,6 @@ export const AuthController = {
   logout,
   googleLogin,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  changePassword,
 };

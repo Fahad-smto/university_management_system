@@ -3,7 +3,7 @@ import app from './app';
 import config from './config';
 import prisma from './lib/prisma';
 import seed from './seed';
-import { redisClient } from './lib/redis';
+import redisClient from './lib/redis';
 
 let server: Server;
 
