@@ -12,7 +12,7 @@ import { MemberRoutes } from "../modules/Member/member.route";
 // import { ElectionRoutes } from '../modules/Election/election.route';
 // import { MonthlyDueRoutes } from '../modules/MonthlyDue/monthlyDue.route';
 // import { PaymentRoutes } from '../modules/Payment/payment.route';
-// import { EventRoutes } from '../modules/Event/event.route';
+import { EventRoutes } from '../modules/Event/event.route';
 // import { NoticeRoutes } from '../modules/Notice/notice.route';
 // import { ComplaintRoutes } from '../modules/Complaint/complaint.route';
 // import { AdminRoutes } from '../modules/Admin/admin.route';
@@ -29,7 +29,7 @@ const moduleRoutes: { path: string; route: Router }[] = [
 	// { path: '/elections', route: ElectionRoutes },
 	// { path: '/monthly-dues', route: MonthlyDueRoutes },
 	// { path: '/payments', route: PaymentRoutes },
-	// { path: '/events', route: EventRoutes },
+	{ path: '/events', route: EventRoutes },
 	// { path: '/notices', route: NoticeRoutes },
 	// { path: '/complaints', route: ComplaintRoutes },
 	// { path: '/admin', route: AdminRoutes },
