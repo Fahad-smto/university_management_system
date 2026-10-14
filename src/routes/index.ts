@@ -1,5 +1,7 @@
+/** biome-ignore-all lint/suspicious/useIterableCallbackReturn: <explanation> */
 import { Router } from "express";
 import { AuthRoutes } from "../modules/Auth/auth.route";
+import { MemberRoutes } from "../modules/Member/member.route";
 
 // TODO: import each module's routes as they get implemented
 // import { AuthRoutes } from '../modules/Auth/auth.route';
@@ -22,7 +24,7 @@ const moduleRoutes: { path: string; route: Router }[] = [
 	{ path: '/auth', route: AuthRoutes },
 	// { path: '/users', route: UserRoutes },
 	// { path: '/sections', route: SectionRoutes },
-	// { path: '/members', route: MemberRoutes },
+	{ path: '/members', route: MemberRoutes },
 	// { path: '/moderators', route: ModeratorRoutes },
 	// { path: '/elections', route: ElectionRoutes },
 	// { path: '/monthly-dues', route: MonthlyDueRoutes },
