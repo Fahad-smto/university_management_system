@@ -1,31 +1,44 @@
 import { NextFunction, Request, Response } from 'express';
 import ApiError from '../errors/ApiError';
+import prisma from '../lib/prisma';
 import { jwtHelpers } from '../utils/jwtHelpers';
 import config from '../config';
 
 export const auth = (...requiredRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // ১. accessToken cookie থেকে নেওয়া হচ্ছে (header থেকেও নেওয়া যায়, কিন্তু আমরা cookie ব্যবহার করছি)
       const token = req.cookies.accessToken;
 
       if (!token) {
         throw new ApiError(401, 'You are not authorized. Please log in');
       }
 
-      // ২. টোকেন verify করা — ভুল/মেয়াদ শেষ হলে এখানেই exception throw হবে
-      let decoded : any;
+      // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+      let decoded;
       try {
         decoded = jwtHelpers.verifyToken(token, config.jwt.access_secret as string);
       } catch (error) {
         throw new ApiError(401, 'Invalid or expired token. Please log in again');
       }
 
-      // ৩. পরবর্তী middleware/controller এর জন্য req.user সেট করা
-      (req as any).user = decoded;
+      // token এর তথ্যের উপর ভরসা না করে ডাটাবেস থেকে এখনকার অবস্থা দেখা হচ্ছে
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, email: true, role: true, isBlocked: true, deletedAt: true },
+      });
 
-      // ৪. নির্দিষ্ট role দেওয়া থাকলে চেক করা
-      if (requiredRoles.length && !requiredRoles.includes(decoded.role)) {
+      if (!user || user.deletedAt) {
+        throw new ApiError(401, 'Account not found');
+      }
+
+      if (user.isBlocked) {
+        throw new ApiError(403, 'This account has been blocked');
+      }
+
+      // role ডাটাবেস থেকে আসছে, তাই role বদলালে সাথে সাথে কার্যকর হবে
+      (req as any).user = { id: user.id, email: user.email, role: user.role };
+
+      if (requiredRoles.length && !requiredRoles.includes(user.role)) {
         throw new ApiError(403, 'You do not have permission to access this resource');
       }
 
