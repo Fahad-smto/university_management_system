@@ -1,22 +1,50 @@
-import { Router } from "express";
-// import auth from '../../middlewares/auth';
-// import validateRequest from '../../middlewares/validateRequest';
-// import { moderatorController } from './moderator.controller';
-// import { moderatorValidation } from './moderator.validation';
+import { Router } from 'express';
+import auth from '../../middlewares/auth';
+import optionalAuth from '../../middlewares/optionalAuth';
+import validateRequest from '../../middlewares/validateRequest';
+import { ModeratorController } from './moderator.controller';
+import { ModeratorValidation } from './moderator.validation';
 
 const router = Router();
 
-// ---- Moderator (panel) routes ----
-// router.post('/', validateRequest(moderatorValidation.createModeratorZod), auth('ADMIN'), moderatorController.createModerator);
-// router.get('/', moderatorController.getAllModerators);
-// router.get('/:id', moderatorController.getSingleModerator);
-// router.patch('/:id', validateRequest(moderatorValidation.updateModeratorZod), auth('ADMIN'), moderatorController.updateModerator);
-// router.delete('/:id', auth('ADMIN'), moderatorController.softDeleteModerator);
+// ---- সবার জন্য ----
+router.get('/', ModeratorController.getAllModerators);
+router.get('/:id', optionalAuth, ModeratorController.getSingleModerator);
 
-// ---- ModeratorMember routes (nested under a moderator panel) ----
-// router.post('/:moderatorId/members', validateRequest(moderatorValidation.addMemberZod), auth('ADMIN'), moderatorController.addMember);
-// router.get('/:moderatorId/members', moderatorController.getMembers);
-// router.patch('/members/:memberId', auth('ADMIN'), moderatorController.updateMember);
-// router.delete('/members/:memberId', auth('ADMIN'), moderatorController.removeMember);
+// ---- সদস্য ম্যানেজ (Admin) — '/members/...' রুট গুলো আগে রাখা হয়েছে ----
+router.patch(
+  '/members/:memberId',
+  auth('ADMIN', 'SUPER_ADMIN'),
+  validateRequest(ModeratorValidation.updateMemberZod),
+  ModeratorController.updateMember,
+);
+router.delete('/members/:memberId', auth('ADMIN', 'SUPER_ADMIN'), ModeratorController.removeMember);
+
+// ---- Panel ম্যানেজ (Admin) ----
+router.post(
+  '/',
+  auth('ADMIN', 'SUPER_ADMIN'),
+  validateRequest(ModeratorValidation.createModeratorZod),
+  ModeratorController.createModerator,
+);
+router.patch(
+  '/:id',
+  auth('ADMIN', 'SUPER_ADMIN'),
+  validateRequest(ModeratorValidation.updateModeratorZod),
+  ModeratorController.updateModerator,
+);
+router.patch(
+  '/:id/status',
+  auth('ADMIN', 'SUPER_ADMIN'),
+  validateRequest(ModeratorValidation.updateStatusZod),
+  ModeratorController.updateModeratorStatus,
+);
+router.delete('/:id', auth('ADMIN', 'SUPER_ADMIN'), ModeratorController.softDeleteModerator);
+router.post(
+  '/:id/members',
+  auth('ADMIN', 'SUPER_ADMIN'),
+  validateRequest(ModeratorValidation.addMemberZod),
+  ModeratorController.addMember,
+);
 
 export const ModeratorRoutes = router;

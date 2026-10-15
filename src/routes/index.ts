@@ -5,10 +5,10 @@ import { MemberRoutes } from "../modules/Member/member.route";
 
 // TODO: import each module's routes as they get implemented
 // import { AuthRoutes } from '../modules/Auth/auth.route';
-// import { UserRoutes } from '../modules/User/user.route';
+import { UserRoutes } from '../modules/User/user.route';
 // import { SectionRoutes } from '../modules/Section/section.route';
 // import { MemberRoutes } from '../modules/Member/member.route';
-// import { ModeratorRoutes } from '../modules/Moderator/moderator.route';
+import { ModeratorRoutes } from '../modules/Moderator/moderator.route';
 // import { ElectionRoutes } from '../modules/Election/election.route';
 // import { MonthlyDueRoutes } from '../modules/MonthlyDue/monthlyDue.route';
 // import { PaymentRoutes } from '../modules/Payment/payment.route';
@@ -22,10 +22,10 @@ const router = Router();
 
 const moduleRoutes: { path: string; route: Router }[] = [
 	{ path: '/auth', route: AuthRoutes },
-	// { path: '/users', route: UserRoutes },
+	{ path: '/users', route: UserRoutes },
 	// { path: '/sections', route: SectionRoutes },
 	{ path: '/members', route: MemberRoutes },
-	// { path: '/moderators', route: ModeratorRoutes },
+	{ path: '/moderators', route: ModeratorRoutes },
 	// { path: '/elections', route: ElectionRoutes },
 	// { path: '/monthly-dues', route: MonthlyDueRoutes },
 	// { path: '/payments', route: PaymentRoutes },
