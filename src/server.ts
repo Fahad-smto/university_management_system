@@ -1,9 +1,10 @@
-import { Server } from 'http';
+import http, { Server } from 'http';
 import app from './app';
 import config from './config';
 import prisma from './lib/prisma';
 import seed from './seed';
 import redisClient from './lib/redis';
+import { initSocket } from './socket';
 
 let server: Server;
 
@@ -12,14 +13,18 @@ async function main() {
     await prisma.$connect();
     console.log('Database connected successfully');
 
-    await redisClient.connect()
+    await redisClient.connect();
 
     console.log('Redis connected successfully');
 
     // সার্ভার শুরু হওয়ার সময় প্রতিবার চেক করবে — না থাকলে তৈরি করবে, থাকলে স্কিপ করবে
     await seed();
 
-    server = app.listen(config.port, () => {
+    // app.listen এর বদলে http server বানাতে হবে, নাহলে Socket.io বসানো যায় না
+    server = http.createServer(app);
+    initSocket(server);
+
+    server.listen(config.port, () => {
       console.log(`Server is running on port ${config.port}`);
     });
   } catch (error) {

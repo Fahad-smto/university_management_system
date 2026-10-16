@@ -13,7 +13,7 @@ import { ModeratorRoutes } from '../modules/Moderator/moderator.route';
 // import { MonthlyDueRoutes } from '../modules/MonthlyDue/monthlyDue.route';
 // import { PaymentRoutes } from '../modules/Payment/payment.route';
 import { EventRoutes } from '../modules/Event/event.route';
-// import { NoticeRoutes } from '../modules/Notice/notice.route';
+import { NoticeRoutes } from '../modules/Notice/notice.route';
 // import { ComplaintRoutes } from '../modules/Complaint/complaint.route';
 // import { AdminRoutes } from '../modules/Admin/admin.route';
 // import { DashboardRoutes } from '../modules/Dashboard/dashboard.route';
@@ -30,7 +30,7 @@ const moduleRoutes: { path: string; route: Router }[] = [
 	// { path: '/monthly-dues', route: MonthlyDueRoutes },
 	// { path: '/payments', route: PaymentRoutes },
 	{ path: '/events', route: EventRoutes },
-	// { path: '/notices', route: NoticeRoutes },
+	{ path: '/notices', route: NoticeRoutes },
 	// { path: '/complaints', route: ComplaintRoutes },
 	// { path: '/admin', route: AdminRoutes },
 	// { path: '/', route: DashboardRoutes },
