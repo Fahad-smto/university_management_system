@@ -15,8 +15,7 @@ model Moderator {
   deletedAt   DateTime?
 
   members ModeratorMember[]
-  events  Event[]
-  notices Notice[]
+   
 
   @@map("moderators")
 }

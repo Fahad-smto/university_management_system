@@ -1,25 +1,26 @@
-import { NoticeCategory } from '@prisma/client';
-
+// req.user থেকে যা আসে
 export type IAuthUser = {
   id: string;
   role: string;
 };
 
 export type ICreateNoticePayload = {
-  moderatorId: string;
   title: string;
   content: string;
-  category?: NoticeCategory;
+  category?: string; // GENERAL, EVENT, ELECTION, URGENT
+  publishedAt?: string; // না দিলে এখনই publish, ভবিষ্যতের তারিখ দিলে schedule হবে
 };
 
 export type IUpdateNoticePayload = {
   title?: string;
   content?: string;
-  category?: NoticeCategory;
+  category?: string;
+  publishedAt?: string;
 };
 
 export type INoticeFilters = {
   searchTerm?: string;
   category?: string;
-  moderatorId?: string;
+  fromDate?: string;
+  toDate?: string;
 };

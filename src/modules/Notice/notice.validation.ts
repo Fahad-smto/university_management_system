@@ -1,27 +1,34 @@
 import { z } from 'zod';
 
-const categoryEnum = z.enum(['GENERAL', 'EVENT', 'ELECTION', 'URGENT']);
+const CATEGORIES = ['GENERAL', 'EVENT', 'ELECTION', 'URGENT'] as const;
+
+const dateString = z
+  .string()
+  .refine((value) => !Number.isNaN(Date.parse(value)), 'Invalid date');
 
 const createNoticeZod = z.object({
   body: z.object({
-    moderatorId: z.string({ required_error: 'Moderator id is required' }).uuid('Invalid moderator id'),
-    title: z.string({ required_error: 'Title is required' }).min(1).max(150),
-    content: z.string({ required_error: 'Content is required' }).min(1),
-    category: categoryEnum.optional(),
+    title: z.string({ required_error: 'Title is required' }).min(1, 'Title cannot be empty').max(200),
+    content: z.string({ required_error: 'Content is required' }).min(1, 'Content cannot be empty'),
+    category: z.enum(CATEGORIES).optional(),
+    publishedAt: dateString.optional(),
   }),
 });
 
 const updateNoticeZod = z.object({
   body: z
     .object({
-      title: z.string().min(1).max(150).optional(),
+      title: z.string().min(1).max(200).optional(),
       content: z.string().min(1).optional(),
-      category: categoryEnum.optional(),
+      category: z.enum(CATEGORIES).optional(),
+      publishedAt: dateString.optional(),
     })
-    .refine(
-      (b) => b.title !== undefined || b.content !== undefined || b.category !== undefined,
-      'At least one field (title, content or category) is required',
-    ),
+    .refine((body) => Object.keys(body).length > 0, {
+      message: 'Provide at least one field to update',
+    }),
 });
 
-export const NoticeValidation = { createNoticeZod, updateNoticeZod };
+export const NoticeValidation = {
+  createNoticeZod,
+  updateNoticeZod,
+};

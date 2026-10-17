@@ -7,8 +7,8 @@ enum NoticeCategory {
 
 model Notice {
   id          String         @id @default(uuid())
-  moderatorId String
-  moderator   Moderator      @relation(fields: [moderatorId], references: [id])
+  createdById String?
+  createdBy   User?          @relation("NoticeCreatedBy", fields: [createdById], references: [id])
   title       String
   content     String
   category    NoticeCategory @default(GENERAL)
@@ -16,6 +16,7 @@ model Notice {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   deletedAt   DateTime?
+  
 
   @@map("notices")
 }

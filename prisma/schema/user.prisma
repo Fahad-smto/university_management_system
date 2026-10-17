@@ -4,19 +4,20 @@ enum Role {
   MODERATOR
   MEMBER
 }
+
 model User {
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  password  String?
-  googleId String?   @unique
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  password     String?
+  googleId     String?      @unique
   authProvider AuthProvider @default(CREDENTIALS)
-  phone     String?
-  role      Role      @default(MEMBER)
-  isBlocked Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  phone        String?
+  role         Role         @default(MEMBER)
+  isBlocked    Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
 
   memberProfile      MemberProfile?
   moderatorMembers   ModeratorMember[]
@@ -24,6 +25,8 @@ model User {
   complaints         Complaint[]
   payments           Payment[]
   auditLogs          AuditLog[]
+  noticesCreated     Notice[]            @relation("NoticeCreatedBy")
+  eventsCreated      Event[]             @relation("EventCreatedBy")
 
   @@map("users")
 }
