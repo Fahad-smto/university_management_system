@@ -42,8 +42,9 @@ router.get(
   EventController.getRegistrations,
 );
 
-// ---- শুধু Admin ----
-router.delete('/:id', auth('ADMIN', 'SUPER_ADMIN'), EventController.softDeleteEvent);
+ 
+// ---- ----
+router.delete('/:id', auth('MODERATOR','ADMIN', 'SUPER_ADMIN'), EventController.softDeleteEvent);
 
 // ---- Member registration ----
 router.post('/:id/register', auth(), EventController.registerForEvent);

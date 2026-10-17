@@ -3,7 +3,7 @@ import prisma from '../../lib/prisma';
 import ApiError from '../../errors/ApiError';
 import { paginationHelpers } from '../../utils/paginationHelpers';
 import { createAuditLog } from '../../utils/auditLogger';
-import { emitToAll } from '../../socket';
+import { IPaginationOptions } from '../../interface/common';
 import {
   IAuthUser,
   ICreateNoticePayload,
@@ -11,10 +11,14 @@ import {
   INoticeFilters,
 } from './notice.interface';
 
-// sort এ শুধু এই field গুলো চলবে
-const ALLOWED_SORT_FIELDS = ['publishedAt', 'createdAt', 'title'];
+const ALLOWED_SORT_FIELDS = ['publishedAt', 'createdAt', 'title', 'category'];
 
-// notice দেখানোর সময় যা যা select হবে
+// যারা schedule করা (এখনো publish না হওয়া) নোটিশও দেখতে পারবে
+const STAFF_ROLES = ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'];
+
+const isStaff = (role?: string): boolean => !!role && STAFF_ROLES.includes(role);
+
+// নোটিশ দেখানোর সময় যা যা select হবে
 const noticeSelect = {
   id: true,
   title: true,
@@ -23,67 +27,87 @@ const noticeSelect = {
   publishedAt: true,
   createdAt: true,
   updatedAt: true,
-  moderator: { select: { id: true, name: true } },
+  createdBy: { select: { id: true, name: true } },
+} satisfies Prisma.NoticeSelect;
+
+const parseDate = (value: string, fieldName: string): Date => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new ApiError(400, `Invalid ${fieldName}`);
+  }
+  return date;
 };
 
-// Admin সব panel এর notice পারে, Moderator শুধু নিজের panel এর
-const assertCanManageNotice = async (actor: IAuthUser, moderatorId: string) => {
-  if (actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN') return;
-
-  const isPanelMember = await prisma.moderatorMember.findFirst({
-    where: { userId: actor.id, moderatorId, deletedAt: null },
-  });
-
-  if (!isPanelMember) {
-    throw new ApiError(403, 'You are not a member of the moderator panel that owns this notice');
+const assertValidCategory = (category: string) => {
+  if (!Object.values(NoticeCategory).includes(category as NoticeCategory)) {
+    throw new ApiError(400, 'Invalid category');
   }
 };
 
-// ---------- Notice তৈরি ----------
+// সাধারণ ইউজার কখনো "এখনের পরের" তারিখের নোটিশ দেখবে না
+const buildPublishedFilter = (
+  filters: INoticeFilters,
+  staff: boolean,
+): Prisma.DateTimeFilter | undefined => {
+  const now = new Date();
+  const gte = filters.fromDate ? parseDate(filters.fromDate, 'fromDate') : undefined;
+  let lte = filters.toDate ? parseDate(filters.toDate, 'toDate') : undefined;
+
+  if (!staff && (!lte || lte > now)) {
+    lte = now;
+  }
+
+  if (!gte && !lte) return undefined;
+
+  return { ...(gte && { gte }), ...(lte && { lte }) };
+};
+
+// ---------- নোটিশ তৈরি (Moderator / Admin / Super Admin) ----------
 const createNotice = async (actor: IAuthUser, payload: ICreateNoticePayload) => {
-  const panel = await prisma.moderator.findFirst({
-    where: { id: payload.moderatorId, deletedAt: null },
-  });
+  if (payload.category) assertValidCategory(payload.category);
 
-  if (!panel) {
-    throw new ApiError(404, 'Moderator panel not found');
-  }
-
-  await assertCanManageNotice(actor, payload.moderatorId);
+  // publishedAt না দিলে এখনই publish
+  const publishedAt = payload.publishedAt
+    ? parseDate(payload.publishedAt, 'publish date')
+    : new Date();
 
   const notice = await prisma.notice.create({
     data: {
-      moderatorId: payload.moderatorId,
+      createdById: actor.id,
       title: payload.title,
       content: payload.content,
-      category: payload.category ?? 'GENERAL',
+      ...(payload.category && { category: payload.category as NoticeCategory }),
+      publishedAt,
     },
     select: noticeSelect,
   });
 
   await createAuditLog(actor.id, 'NOTICE_CREATED', 'Notice', notice.id, notice.title);
 
-  // সবাইকে জানানো
-  emitToAll('notice:new', notice);
-
   return notice;
 };
 
-// ---------- সব notice (pagination + filter + search) ----------
-const getAllNotices = async (filters: INoticeFilters, options: any) => {
-  const { page, limit, skip, sortBy, sortOrder } = paginationHelpers.calculatePagination(options);
-  const safeSortBy = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : 'publishedAt';
+// ---------- সব নোটিশ (pagination + filter + search) ----------
+const getAllNotices = async (
+  filters: INoticeFilters,
+  options: IPaginationOptions,
+  requesterRole?: string,
+) => {
+  const { page, limit, skip, sortOrder } = paginationHelpers.calculatePagination(options);
+
+  // ডিফল্টভাবে সবচেয়ে নতুন প্রকাশিত নোটিশ আগে
+  const safeSortBy =
+    options.sortBy && ALLOWED_SORT_FIELDS.includes(options.sortBy) ? options.sortBy : 'publishedAt';
 
   const where: Prisma.NoticeWhereInput = { deletedAt: null };
 
   if (filters.category) {
-    if (!Object.values(NoticeCategory).includes(filters.category as NoticeCategory)) {
-      throw new ApiError(400, 'Invalid category filter');
-    }
+    assertValidCategory(filters.category);
     where.category = filters.category as NoticeCategory;
   }
 
-  if (filters.moderatorId) where.moderatorId = filters.moderatorId;
+  const publishedFilter = buildPublishedFilter(filters, isStaff(requesterRole));
+  if (publishedFilter) where.publishedAt = publishedFilter;
 
   // title বা content দিয়ে search
   if (filters.searchTerm) {
@@ -107,10 +131,15 @@ const getAllNotices = async (filters: INoticeFilters, options: any) => {
   return { meta: { page, limit, total }, data };
 };
 
-// ---------- একটা notice ----------
-const getSingleNotice = async (id: string) => {
+// ---------- একটা নোটিশ ----------
+const getSingleNotice = async (id: string, requesterRole?: string) => {
   const notice = await prisma.notice.findFirst({
-    where: { id, deletedAt: null },
+    where: {
+      id,
+      deletedAt: null,
+      // সাধারণ ইউজার schedule করা নোটিশ দেখলে "পাওয়া যায়নি" ই পাবে
+      ...(!isStaff(requesterRole) && { publishedAt: { lte: new Date() } }),
+    },
     select: noticeSelect,
   });
 
@@ -121,7 +150,7 @@ const getSingleNotice = async (id: string) => {
   return notice;
 };
 
-// ---------- Notice edit ----------
+// ---------- নোটিশ আপডেট ----------
 const updateNotice = async (actor: IAuthUser, id: string, payload: IUpdateNoticePayload) => {
   const notice = await prisma.notice.findFirst({ where: { id, deletedAt: null } });
 
@@ -129,21 +158,29 @@ const updateNotice = async (actor: IAuthUser, id: string, payload: IUpdateNotice
     throw new ApiError(404, 'Notice not found');
   }
 
-  await assertCanManageNotice(actor, notice.moderatorId);
+  if (payload.category) assertValidCategory(payload.category);
+
+  // প্রকাশিত নোটিশের সময় বদলানো যাবে না, শুধু schedule করা নোটিশের বদলানো যাবে
+  let publishedAt: Date | undefined;
+  if (payload.publishedAt) {
+    if (notice.publishedAt <= new Date()) {
+      throw new ApiError(400, 'Cannot change the publish time of an already published notice');
+    }
+    publishedAt = parseDate(payload.publishedAt, 'publish date');
+  }
 
   const updated = await prisma.notice.update({
     where: { id },
     data: {
       ...(payload.title && { title: payload.title }),
       ...(payload.content && { content: payload.content }),
-      ...(payload.category && { category: payload.category }),
+      ...(payload.category && { category: payload.category as NoticeCategory }),
+      ...(publishedAt && { publishedAt }),
     },
     select: noticeSelect,
   });
 
-  await createAuditLog(actor.id, 'NOTICE_UPDATED', 'Notice', id, updated.title);
-
-  emitToAll('notice:updated', updated);
+  await createAuditLog(actor.id, 'NOTICE_UPDATED', 'Notice', id);
 
   return updated;
 };
@@ -156,13 +193,9 @@ const softDeleteNotice = async (actor: IAuthUser, id: string) => {
     throw new ApiError(404, 'Notice not found');
   }
 
-  await assertCanManageNotice(actor, notice.moderatorId);
-
   await prisma.notice.update({ where: { id }, data: { deletedAt: new Date() } });
 
   await createAuditLog(actor.id, 'NOTICE_DELETED', 'Notice', id, notice.title);
-
-  emitToAll('notice:deleted', { id });
 };
 
 export const NoticeService = {

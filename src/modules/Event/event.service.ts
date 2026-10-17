@@ -23,7 +23,7 @@ const ALLOWED_STATUS_TRANSITIONS: Record<EventStatus, EventStatus[]> = {
   CANCELLED: [],
 };
 
-// ইভেন্ট দেখানোর সময় যা যা select হবে (সব জায়গায় একই, তাই একবারই লেখা)
+// ইভেন্ট দেখানোর সময় যা যা select হবে
 const eventSelect = {
   id: true,
   title: true,
@@ -34,13 +34,13 @@ const eventSelect = {
   capacity: true,
   status: true,
   createdAt: true,
-  moderator: { select: { id: true, name: true } },
+  createdBy: { select: { id: true, name: true } },
   // শুধু REGISTERED গুলো গোনা হবে (cancelled বাদ)
   _count: { select: { registrations: { where: { status: 'REGISTERED' as const } } } },
-} as Prisma.EventSelect;
+} satisfies Prisma.EventSelect;
 
 // _count সরিয়ে registeredCount আর seatsLeft যোগ করা
-const formatEvent = <T extends { capacity?: number | null; _count: { registrations: number } }>(
+const formatEvent = <T extends { capacity: number | null; _count: { registrations: number } }>(
   event: T,
 ) => {
   const { _count, ...rest } = event;
@@ -49,8 +49,7 @@ const formatEvent = <T extends { capacity?: number | null; _count: { registratio
   return {
     ...rest,
     registeredCount,
-    seatsLeft:
-      event.capacity == null ? null : Math.max(event.capacity - registeredCount, 0),
+    seatsLeft: event.capacity === null ? null : Math.max(event.capacity - registeredCount, 0),
   };
 };
 
@@ -62,35 +61,9 @@ const parseDate = (value: string, fieldName: string): Date => {
   return date;
 };
 
-// Admin/Super Admin সব ইভেন্ট ম্যানেজ করতে পারে।
-// Moderator শুধু নিজের panel এর ইভেন্ট ম্যানেজ করতে পারবে।
-const assertCanManageEvent = async (actor: IAuthUser, moderatorId: string) => {
-  if (actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN') return;
-
-  const isPanelMember = await prisma.moderatorMember.findFirst({
-    where: { userId: actor.id, moderatorId, deletedAt: null },
-  });
-
-  if (!isPanelMember) {
-    throw new ApiError(403, 'You are not a member of the moderator panel that owns this event');
-  }
-};
-
-// ---------- ইভেন্ট তৈরি ----------
+// ---------- ইভেন্ট তৈরি (Moderator / Admin / Super Admin) ----------
 const createEvent = async (actor: IAuthUser, payload: ICreateEventPayload) => {
-  // ১. panel সত্যিই আছে কিনা
-  const panel = await prisma.moderator.findFirst({
-    where: { id: payload.moderatorId, deletedAt: null },
-  });
-
-  if (!panel) {
-    throw new ApiError(404, 'Moderator panel not found');
-  }
-
-  // ২. এই ব্যক্তি এই panel এর ইভেন্ট বানাতে পারে কিনা
-  await assertCanManageEvent(actor, payload.moderatorId);
-
-  // ৩. তারিখ ভবিষ্যতের হতে হবে
+  // তারিখ ভবিষ্যতের হতে হবে
   const eventDate = parseDate(payload.eventDate, 'event date');
 
   if (eventDate <= new Date()) {
@@ -99,7 +72,7 @@ const createEvent = async (actor: IAuthUser, payload: ICreateEventPayload) => {
 
   const event = await prisma.event.create({
     data: {
-      moderatorId: payload.moderatorId,
+      createdById: actor.id,
       title: payload.title,
       description: payload.description,
       venue: payload.venue,
@@ -128,8 +101,6 @@ const getAllEvents = async (filters: IEventFilters, options: IPaginationOptions)
     }
     where.status = filters.status as EventStatus;
   }
-
-  if (filters.moderatorId) where.moderatorId = filters.moderatorId;
 
   // তারিখের range filter
   if (filters.fromDate || filters.toDate) {
@@ -183,8 +154,6 @@ const updateEvent = async (actor: IAuthUser, id: string, payload: IUpdateEventPa
     throw new ApiError(404, 'Event not found');
   }
 
-  await assertCanManageEvent(actor, event.moderatorId);
-
   if (event.status === 'COMPLETED' || event.status === 'CANCELLED') {
     throw new ApiError(400, `Cannot edit a ${event.status.toLowerCase()} event`);
   }
@@ -233,8 +202,6 @@ const updateEventStatus = async (actor: IAuthUser, id: string, newStatus: EventS
   if (!event) {
     throw new ApiError(404, 'Event not found');
   }
-
-  await assertCanManageEvent(actor, event.moderatorId);
 
   if (!ALLOWED_STATUS_TRANSITIONS[event.status].includes(newStatus)) {
     throw new ApiError(400, `Cannot change status from ${event.status} to ${newStatus}`);
@@ -302,13 +269,12 @@ const registerForEvent = async (userId: string, eventId: string) => {
     }
 
     // সিট লিমিট থাকলে ভরে গেছে কিনা
-    const capacity = (event as typeof event & { capacity: number | null }).capacity;
-    if (capacity !== null) {
+    if (event.capacity !== null) {
       const registeredCount = await tx.eventRegistration.count({
         where: { eventId, status: 'REGISTERED' },
       });
 
-      if (registeredCount >= capacity) {
+      if (registeredCount >= event.capacity) {
         throw new ApiError(400, 'This event is full');
       }
     }
@@ -351,9 +317,10 @@ const cancelRegistration = async (userId: string, eventId: string) => {
   });
 };
 
-// ---------- একটা ইভেন্টের registration তালিকা (Moderator/Admin) ----------
+// ---------- একটা ইভেন্টের registration তালিকা (Moderator / Admin / Super Admin) ----------
+// route এই role গুলোকেই ঢুকতে দেয়, তাই এখানে আলাদা চেক লাগছে না
 const getRegistrations = async (
-  actor: IAuthUser,
+  _actor: IAuthUser,
   eventId: string,
   filters: IRegistrationFilters,
   options: IPaginationOptions,
@@ -363,8 +330,6 @@ const getRegistrations = async (
   if (!event) {
     throw new ApiError(404, 'Event not found');
   }
-
-  await assertCanManageEvent(actor, event.moderatorId);
 
   const status = (filters.status || 'REGISTERED') as RegistrationStatus;
 

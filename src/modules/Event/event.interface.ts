@@ -1,4 +1,4 @@
-import { EventStatus, RegistrationStatus } from '@prisma/client';
+import { EventStatus } from '@prisma/client';
 
 // req.user থেকে যা আসে
 export type IAuthUser = {
@@ -7,7 +7,6 @@ export type IAuthUser = {
 };
 
 export type ICreateEventPayload = {
-  moderatorId: string; // কোন moderator panel এই ইভেন্ট করছে
   title: string;
   description?: string;
   venue: string;
@@ -32,7 +31,6 @@ export type IUpdateEventStatusPayload = {
 export type IEventFilters = {
   searchTerm?: string;
   status?: string;
-  moderatorId?: string;
   fromDate?: string;
   toDate?: string;
 };

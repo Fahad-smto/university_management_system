@@ -1,13 +1,11 @@
 import { z } from 'zod';
 
-// তারিখ ঠিক আছে কিনা চেক (যেমন "2026-12-20" বা পুরো ISO string দুটোই চলবে)
 const dateString = z
   .string({ required_error: 'Event date is required' })
   .refine((value) => !Number.isNaN(Date.parse(value)), 'Invalid date');
 
 const createEventZod = z.object({
   body: z.object({
-    moderatorId: z.string({ required_error: 'Moderator id is required' }).uuid('Invalid moderator id'),
     title: z.string({ required_error: 'Title is required' }).min(1),
     description: z.string().optional(),
     venue: z.string({ required_error: 'Venue is required' }).min(1),
