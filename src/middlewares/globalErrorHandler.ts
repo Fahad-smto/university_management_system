@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import ApiError from '../errors/ApiError';
 import handleZodError from '../errors/handleZodError';
 import { IGenericErrorMessage } from '../interface/error';
+// import { IGenericErrorMessage } from '../interface/error';
 
 export const globalErrorHandler = (
   err: any,

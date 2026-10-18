@@ -11,7 +11,7 @@ import { UserRoutes } from '../modules/User/user.route';
 import { ModeratorRoutes } from '../modules/Moderator/moderator.route';
 // import { ElectionRoutes } from '../modules/Election/election.route';
 // import { MonthlyDueRoutes } from '../modules/MonthlyDue/monthlyDue.route';
-// import { PaymentRoutes } from '../modules/Payment/payment.route';
+import { PaymentRoutes } from '../modules/Payment/payment.route';
 import { EventRoutes } from '../modules/Event/event.route';
 import { NoticeRoutes } from '../modules/Notice/notice.route';
 // import { ComplaintRoutes } from '../modules/Complaint/complaint.route';
@@ -28,7 +28,7 @@ const moduleRoutes: { path: string; route: Router }[] = [
 	{ path: '/moderators', route: ModeratorRoutes },
 	// { path: '/elections', route: ElectionRoutes },
 	// { path: '/monthly-dues', route: MonthlyDueRoutes },
-	// { path: '/payments', route: PaymentRoutes },
+	{ path: '/payments', route: PaymentRoutes },
 	{ path: '/events', route: EventRoutes },
 	{ path: '/notices', route: NoticeRoutes },
 	// { path: '/complaints', route: ComplaintRoutes },
