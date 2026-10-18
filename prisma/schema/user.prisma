@@ -19,14 +19,16 @@ model User {
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
 
-  memberProfile      MemberProfile?
-  moderatorMembers   ModeratorMember[]
-  eventRegistrations EventRegistration[]
-  complaints         Complaint[]
-  payments           Payment[]
-  auditLogs          AuditLog[]
-  noticesCreated     Notice[]            @relation("NoticeCreatedBy")
-  eventsCreated      Event[]             @relation("EventCreatedBy")
+  memberProfile        MemberProfile?
+  moderatorMembers     ModeratorMember[]
+  eventRegistrations   EventRegistration[]
+  complaints           Complaint[]
+  payments             Payment[]
+  auditLogs            AuditLog[]
+  noticesCreated       Notice[]            @relation("NoticeCreatedBy")
+  eventsCreated        Event[]             @relation("EventCreatedBy")
+  profileImage         String?
+  profileImagePublicId String?
 
   @@map("users")
 }

@@ -1,10 +1,12 @@
-import { config } from './../config/index';
 import { v2 as cloudinary } from 'cloudinary';
- cloudinary.config({ 
-        cloud_name: config.cloudinary.cloud_name, // Click 'View API Keys' above to copy your cloud name
-        api_key: config.cloudinary.api_key, // Click 'View API Keys' above to copy your API key
-        api_secret: config.cloudinary.api_secret // Click 'View API Keys' above to copy your API secret
-    });
-    
+import config from '../config';
 
-export const cloudinaryUploader = cloudinary.uploader;
+// Cloudinary এর সাথে সংযোগের সেটিং, একবারই করা হয়
+cloudinary.config({
+  cloud_name: config.cloudinary.cloud_name,
+  api_key: config.cloudinary.api_key,
+  api_secret: config.cloudinary.api_secret,
+  secure: true,
+});
+
+export default cloudinary;
