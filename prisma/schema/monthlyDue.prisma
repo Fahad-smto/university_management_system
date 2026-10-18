@@ -17,7 +17,7 @@ model MonthlyDue {
   updatedAt DateTime      @updatedAt
   deletedAt DateTime?
 
-  payment Payment?
+  payments Payment[]
 
   @@unique([memberId, month, year])
   @@map("monthly_dues")

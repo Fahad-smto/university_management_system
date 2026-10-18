@@ -14,8 +14,7 @@ model Payment {
   id            String         @id @default(uuid())
   userId        String
   user          User           @relation(fields: [userId], references: [id])
-  dueId         String?        @unique
-  due           MonthlyDue?    @relation(fields: [dueId], references: [id])
+   bkashPaymentId String?       @unique
   amount        Decimal        @db.Decimal(10, 2)
   purpose       PaymentPurpose
   status        PaymentStatus  @default(PENDING)
@@ -24,4 +23,5 @@ model Payment {
   updatedAt     DateTime       @updatedAt
 
   @@map("payments")
+  monthlyDues MonthlyDue[]
 }

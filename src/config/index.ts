@@ -52,7 +52,15 @@ export const config = {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
-  }
+  },
+    bkash: {
+    base_url: process.env.BKASH_BASE_URL,
+    username: process.env.BKASH_USERNAME,
+    password: process.env.BKASH_PASSWORD,
+    app_key: process.env.BKASH_APP_KEY,
+    app_secret: process.env.BKASH_APP_SECRET,
+    callback_url: process.env.BKASH_CALLBACK_URL,
+  },
 };
 
 export default config;
