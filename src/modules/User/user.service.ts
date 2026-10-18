@@ -5,6 +5,8 @@ import { paginationHelpers } from '../../utils/paginationHelpers';
 import { createAuditLog } from '../../utils/auditLogger';
 import { IPaginationOptions } from '../../interface/common';
 import { IAuthUser, IUpdateMePayload, IUserFilters } from './user.interface';
+import { uploadImageBuffer, deleteImage } from '../../lib/cloudinaryHelpers';
+
 
 const ALLOWED_SORT_FIELDS = ['createdAt', 'name', 'email'];
 
@@ -200,6 +202,80 @@ const softDeleteUser = async (actor: IAuthUser, targetId: string) => {
   await createAuditLog(actor.id, 'USER_DELETED', 'User', targetId);
 };
 
+
+// ---------- প্রোফাইল ছবি আপলোড / বদল ----------
+const updateProfileImage = async (userId: string, file?: Express.Multer.File) => {
+  if (!file) {
+    throw new ApiError(400, 'Please select an image (form-data field name must be "image")');
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: { id: true, profileImagePublicId: true },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  // ১. আগে নতুন ছবি আপলোড (ব্যর্থ হলে পুরনো ছবি যেমন ছিল তেমনই থাকে)
+  const uploaded = await uploadImageBuffer(file.buffer, 'college-org/profile-pictures');
+
+  // ২. ডাটাবেসে নতুন URL বসানো। এটা ব্যর্থ হলে এইমাত্র আপলোড করা ছবিটা মুছে দেওয়া হয়
+  const updated = await prisma.user
+    .update({
+      where: { id: userId },
+      data: { profileImage: uploaded.url, profileImagePublicId: uploaded.publicId },
+      select: userSelect,
+    })
+    .catch(async (error) => {
+      await deleteImage(uploaded.publicId);
+      throw error;
+    });
+
+  // ৩. সবকিছু ঠিকঠাক হলে তবেই পুরনো ছবি মোছা হয়।
+  // মুছতে না পারলে ইউজারের কাজ আটকাবে না, শুধু লগে দেখাবে
+  if (user.profileImagePublicId) {
+    try {
+      await deleteImage(user.profileImagePublicId);
+    } catch (error) {
+      console.error('Could not delete the old profile image:', error);
+    }
+  }
+
+  return updated;
+};
+
+// ---------- প্রোফাইল ছবি মুছে ফেলা ----------
+const deleteProfileImage = async (userId: string) => {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: { id: true, profileImagePublicId: true },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  if (!user.profileImagePublicId) {
+    throw new ApiError(400, 'You do not have a profile image');
+  }
+
+  // আগে ডাটাবেস পরিষ্কার, তারপর Cloudinary থেকে মোছা
+  await prisma.user.update({
+    where: { id: userId },
+    data: { profileImage: null, profileImagePublicId: null },
+  });
+
+  try {
+    await deleteImage(user.profileImagePublicId);
+  } catch (error) {
+    console.error('Could not delete the profile image from Cloudinary:', error);
+  }
+};
+
+
+
 export const UserService = {
   getMe,
   updateMe,
@@ -208,4 +284,6 @@ export const UserService = {
   changeUserRole,
   setBlockStatus,
   softDeleteUser,
+  deleteProfileImage,
+  updateProfileImage,
 };

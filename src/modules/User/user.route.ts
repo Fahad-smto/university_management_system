@@ -3,6 +3,7 @@ import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { UserController } from './user.controller';
 import { UserValidation } from './user.validation';
+import uploadSingleImage from '../../middlewares/upload';
 
 const router = Router();
 
@@ -28,5 +29,12 @@ router.patch(
   UserController.setBlockStatus,
 );
 router.delete('/:id', auth('ADMIN', 'SUPER_ADMIN'), UserController.softDeleteUser);
+
+
+// ---- প্রোফাইল ছবি (সব role এর জন্য) ----
+// auth আগে, তাই লগইন ছাড়া কেউ ছবি আপলোড করতে পারে না
+router.patch('/me/profile-image', auth(), uploadSingleImage, UserController.updateProfileImage);
+router.delete('/me/profile-image', auth(), UserController.deleteProfileImage);
+
 
 export const UserRoutes = router;

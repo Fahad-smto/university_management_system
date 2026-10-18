@@ -89,6 +89,32 @@ const softDeleteUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const updateProfileImage = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const result = await UserService.updateProfileImage(userId, req.file);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Profile image updated successfully',
+    data: result,
+  });
+});
+
+const deleteProfileImage = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  await UserService.deleteProfileImage(userId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Profile image removed successfully',
+  });
+});
+
+
+
 export const UserController = {
   getMe,
   updateMe,
@@ -97,4 +123,6 @@ export const UserController = {
   changeUserRole,
   setBlockStatus,
   softDeleteUser,
+  updateProfileImage,
+  deleteProfileImage,
 };
