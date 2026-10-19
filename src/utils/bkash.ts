@@ -20,7 +20,7 @@ const callBkash = async (
       headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...headers },
       body: JSON.stringify(body),
     });
-    data = await response.json();
+   data = (await response.json()) as IBkashResponse;
   } catch (error) {
     console.error('bKash request failed:', error);
     throw new ApiError(502, 'Could not reach bKash. Please try again later');
