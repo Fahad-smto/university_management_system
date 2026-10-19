@@ -4,7 +4,7 @@
   "description": "Backend API for an unofficial college student organization management system",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
@@ -16,13 +16,14 @@
     "format:check": "npx @biomejs/biome format ./src",
     "format:fix": "npx @biomejs/biome format --write ./src",
     "link:check": "npx @biomejs/biome lint ./src ./public",
-    "link:fix": "npx @biomejs/biome lint --write ./src"
+    "link:fix": "npx @biomejs/biome lint --write ./src",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "schema": "prisma/schema"
   },
   "dependencies": {
-    "@prisma/client": "^5.18.0",
+    "@prisma/client": "^5.22.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.6",
@@ -55,7 +56,7 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.3",
-    "prisma": "^5.18.0",
+    "prisma": "^5.22.0",
     "tsx": "^4.19.2",
     "typescript": "^5.5.4"
   }

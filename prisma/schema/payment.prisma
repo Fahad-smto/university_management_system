@@ -11,17 +11,19 @@ enum PaymentPurpose {
 }
 
 model Payment {
-  id            String         @id @default(uuid())
-  userId        String
-  user          User           @relation(fields: [userId], references: [id])
-   bkashPaymentId String?       @unique
-  amount        Decimal        @db.Decimal(10, 2)
-  purpose       PaymentPurpose
-  status        PaymentStatus  @default(PENDING)
-  transactionId String?        @unique
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String         @id @default(uuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id])
+  bkashPaymentId String?        @unique
+  amount         Decimal        @db.Decimal(10, 2)
+  purpose        PaymentPurpose
+  status         PaymentStatus  @default(PENDING)
+  transactionId  String?        @unique
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  dueId          String?
+  due            MonthlyDue?    @relation("PaymentDue", fields: [dueId], references: [id])
+  monthlyDues    MonthlyDue[]   @relation("PaymentMonthlyDues")
 
   @@map("payments")
-  monthlyDues MonthlyDue[]
 }

@@ -16,8 +16,8 @@ model MonthlyDue {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   deletedAt DateTime?
-
-  payments Payment[]
+  payments    Payment[]  @relation("PaymentMonthlyDues")
+  duePayments Payment[]  @relation("PaymentDue")
 
   @@unique([memberId, month, year])
   @@map("monthly_dues")
