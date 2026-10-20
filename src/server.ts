@@ -16,11 +16,9 @@ async function main() {
     await redisClient.connect();
 
     console.log('Redis connected successfully');
-
-    // সার্ভার শুরু হওয়ার সময় প্রতিবার চেক করবে — না থাকলে তৈরি করবে, থাকলে স্কিপ করবে
+ 
     await seed();
-
-    // app.listen এর বদলে http server বানাতে হবে, নাহলে Socket.io বসানো যায় না
+ 
     server = http.createServer(app);
     initSocket(server);
 
