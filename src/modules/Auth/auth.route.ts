@@ -20,7 +20,7 @@ router.post(
 router.post(
   '/reset-password',
   validateRequest(AuthValidation.resetPasswordZod),
-  AuthController.resetPassword,
+ 
 );
 
 // change-password লগইন করা ইউজারের জন্য — OTP লাগবে না, তাই auth() middleware যথেষ্ট
